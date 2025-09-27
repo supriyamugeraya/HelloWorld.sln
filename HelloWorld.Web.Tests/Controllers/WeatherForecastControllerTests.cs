@@ -132,14 +132,46 @@ namespace HelloWorld.Web.Tests.Controllers
             _sut = new WeatherForecastController(_logger, _weatherForecastService);
         }
 
-        [Fact]
-        public async Task Get_FiveDayForecast_ReturnsFiveItems()
+        //[Fact]
+        //public async Task Get_FiveDayForecast_ReturnsFiveItems()
+        //{
+        //    _weatherForecastService.GetData("W1").Returns(WeatherForecasts);
+
+        //    var result = await _sut.Get("W1");
+
+        //    Console.WriteLine($"Result count: {result.Count()}");
+        //    Assert.Equal(5, result.Count());
+        //}
+
+
+
+        public static readonly IEnumerable<object[]> TestData = new[]
         {
-            _weatherForecastService.GetData("W1").Returns(WeatherForecasts);
+            new object[] { "W1" },
+            new object[] { "W3" },
+            new object[] { "SW15" },
+            new object[] { "NW10" },
+        };
 
-            var result = await _sut.Get("W1");
 
-            Console.WriteLine($"Result count: {result.Count()}");
+        // Instead of using facts, we can use Theory to test multiple scenarios
+        [Theory]
+        //[InlineData("W1")]
+        //[InlineData("W3")]
+        //[InlineData("SW15")]
+        //[InlineData("NW10")]
+        [MemberData(nameof(TestData))]
+        public async Task Get_FiveDayForecast_ReturnsFiveItems(string districtCode)
+        {
+            // Arrange
+            _weatherForecastService
+                .GetData(districtCode)
+                .Returns(WeatherForecasts);
+
+            // Act
+            var result = await _sut.Get(districtCode);
+
+            // Assert
             Assert.Equal(5, result.Count());
         }
 
@@ -187,8 +219,10 @@ namespace HelloWorld.Web.Tests.Controllers
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(
                 async () => await _sut.Get(""));
 
-
-            Assert.Equal("Your exception message", exception.Message);
+            // The default message format is: "Value cannot be null. (Parameter 'districtCode')"
+            Assert.StartsWith("Value cannot be null.", exception.Message);
+            Assert.Contains("(Parameter 'districtCode')", exception.Message);
+            Assert.Equal("districtCode", exception.ParamName);
         }
     }
 }

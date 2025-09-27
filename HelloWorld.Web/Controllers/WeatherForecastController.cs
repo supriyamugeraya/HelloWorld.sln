@@ -12,6 +12,13 @@ namespace HelloWorld.Web.Controllers
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
+        //  Add SupportedRegions here
+        private static readonly string[] SupportedRegions = new[]
+        {
+            "W1", "W3", "SW15", "NW10"
+        };
+        // 
+        
         private readonly ILogger<WeatherForecastController> _logger;
         private readonly IWeatherForecastService _weatherForecastService;
 
@@ -42,6 +49,13 @@ namespace HelloWorld.Web.Controllers
             }
 
             _logger.LogInformation("Get method was called");
+
+            //  Add the region check here
+            if (!SupportedRegions.Contains(districtCode))
+            {
+                throw new NotSupportedException("No data available for " + districtCode);
+            }
+
             return await _weatherForecastService.GetData(districtCode);
         }
     }
